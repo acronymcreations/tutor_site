@@ -87,3 +87,7 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# Exclude Config Files
+/client_secrets.json
+/fb_client_secrets.json
