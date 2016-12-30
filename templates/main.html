@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+	<section class="half" id="left">
+		<h3 class="all">Select a Subject</h3>
+		<ul class="all">
+		{% for s in subjects %}
+		<li><a href="{{url_for('subjectView',subject_name=s.name)}}">{{s.name}}</a></li>
+		{% endfor %}
+	</ul>
+	</section>
+	<section class="half" id="right">
+		<h3 class="all">Select a Tutor</h3>
+		<ul class="all">
+		{% for p in posts %}
+		<li><a href="{{url_for('postView',subject_name=p.subject.name,post_id=p.id)}}">{{p.user.name}}</a></li>
+		{% endfor %}
+	</ul>
+	</section>
+	
+
+{% endblock %}

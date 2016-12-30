@@ -1,0 +1,30 @@
+<body>
+	<h2>Current user is {{username}}</h2>
+	<h2>Subjects:</h2>
+	<ul>
+		{% for s in subjects %}
+		<li>{{s.id}} : {{s.name}}</li>
+		{% endfor %}
+	</ul>
+	<h2>Posts:</h2>
+	<ul>
+		{% for p in posts %}
+		<li>{{p.id}} : {{p.user.name}}</li>
+		<ul>
+			<li>{{p.description}}</li>
+			<li>{{p.rate}}</li>
+			<li>{{p.subject.name}}</li>
+		</ul>
+		{% endfor %}
+	</ul>
+	<h2>Users:</h2>
+	<ul>
+		{% for u in users %}
+		<li>{{u.id}} : {{u.name}}</li>
+		<ul>
+			<li>{{u.email}}</li>
+			<li>{{u.picture}}</li>
+		</ul>
+		{% endfor %}
+	</ul>
+</body>

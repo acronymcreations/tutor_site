@@ -1,0 +1,10 @@
+
+
+<body>
+	<h2>Select a Tutor:</h2>
+	<ul>
+		{% for p in posts %}
+		<li>{{p.user.name}}</li>
+		{% endfor %}
+	</ul>
+</body>
