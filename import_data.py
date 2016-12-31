@@ -7,6 +7,7 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
+
 # po = session.query(Post).delete()
 # print 'deleted %s rows from Post' % po
 # session.commit()

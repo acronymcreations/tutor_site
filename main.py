@@ -26,10 +26,38 @@ DBsession = sessionmaker(bind=engine)
 session = DBsession()
 
 
+def createUser(login_session):
+    newUser = User(name=login_session.get('username'),
+                   email=login_session.get('email'),
+                   picture=login_session.get('picture'))
+    session.add(newUser)
+    session.commit()
+    user = session.query(User).filter(
+        User.email == login_session.get('email')).first()
+    print 'User number %s created' % user.id
+    return user
+
+
+def checkForUser(login_session):
+    user = session.query(User).filter(
+        User.email == login_session.get('email')).first()
+    return user
+
+
+def getUserID(email):
+    user = session.query(User).filter(
+        User.email == email).first()
+    return user
+
+
 @app.route('/')
 def main():
+    print 'access token is %s' % login_session.get('access_token')
+    print 'username is %s' % login_session.get('username')
     if login_session.get('access_token') is not None:
-        user = login_session['username']
+        print login_session['access_token']
+        user = session.query(User).filter(
+            User.email == login_session.get('email')).first()
         state = None
     else:
         user = None
@@ -135,6 +163,7 @@ def gconnect():
     login_session['access_token'] = credentials.access_token
     login_session['credentials'] = credentials
     login_session['gplus_id'] = gplus_id
+    print login_session['access_token']
     print login_session['credentials']
     print login_session['gplus_id']
 
@@ -149,19 +178,12 @@ def gconnect():
     login_session['username'] = data['name']
     login_session['picture'] = data['picture']
     login_session['email'] = data['email']
-
-    print '1'
-    output = ''
-    output += '<h1>Welcome, '
-    output += login_session['username']
-    output += '!</h1>'
-    output += '<img src="'
-    output += login_session['picture']
-    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
-    flash("you are now logged in as %s" % login_session['username'])
     print 'logged in as %s' % login_session['username']
-    print "done!"
-    return output
+    userId = getUserID(login_session['email'])
+    if userId is None:
+        userId = createUser(login_session)
+
+    return redirect(url_for('main'))
 
 
 @app.route('/gdisconnect')

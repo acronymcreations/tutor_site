@@ -16,7 +16,8 @@
 <div class="half text-right">
 
 	{% if user is not none %}
-		<h3>Welcome {{user}}</h3>
+		<h3>Welcome {{user.name}}</h3>
+		<img src="{{user.picture}}" width="80"><br>
 		<a href="{{ url_for('gdisconnect') }}">logout</a>
 	{% else %}
 		
@@ -29,16 +30,12 @@
 				data-callback="signInCallback"
 				data-approvalprompt="force">
 			</span>
+			<br>
 			<button>
-         
-
-          <fb:login-button scope="public_profile,email" onlogin="sendTokenToServer();">
-<a href='javascript:sendTokenToServer()'>Login with Facebook</a>
-
-</fb:login-button>
-
-
-        </button>
+				<fb:login-button scope="public_profile,email" onlogin="sendTokenToServer();">
+				<a href='javascript:sendTokenToServer()'>Login with Facebook</a>
+				</fb:login-button>
+			</button>
 		
 	{% endif %}
 </div>
