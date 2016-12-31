@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<link rel="stylesheet" type="text/css" href="{{url_for('static',filename='styles.css')}}">
+	<link rel="stylesheet" type="text/css" href="{{url_for('static',filename='styles.css')}}?version=1">
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 	<script src="//apis.google.com/js/platform.js?onload=start"> </script>
 	<script src="{{url_for('static',filename='scripts.js')}}"></script>
@@ -31,14 +31,28 @@
 				data-approvalprompt="force">
 			</span>
 			<br>
-			<button>
+			<!-- <button> -->
 				<fb:login-button scope="public_profile,email" onlogin="sendTokenToServer();">
 				<a href='javascript:sendTokenToServer()'>Login with Facebook</a>
 				</fb:login-button>
-			</button>
+			<!-- </button> -->
 		
 	{% endif %}
 </div>
+<div class="all">
+	{% set path = request.path.split('/') %}
+	<a href="{{ url_for('main') }}">home</a> 
+	{% if path|length > 2 %}
+		/ <a href="{{ url_for('subjectView',subject_name=path[2]) }}">{{path[2]}}</a>
+	{% endif %}
+	{% if path|length > 3 %}
+		/ <a href="{{ url_for('postView',subject_name=path[2],post_id=path[3]) }}">{{post.user.name}}</a>
+	{% endif %}
+	
+	
+	
+</div>
+
 
 <script>
   window.fbAsyncInit = function() {
@@ -78,7 +92,7 @@
           $('#result').html('Login Successful!</br>'+ result + '</br>Redirecting...')
          setTimeout(function() {
           window.location.href = "/restaurant";
-         }, 4000);
+         }, 500);
           
       } else {
         $('#result').html('Failed to make a server-side call. Check your configuration and console.');
@@ -109,7 +123,7 @@
 			$('#result').html('Login Successful!</br>'+ result + '</br>Redirecting...')
 			setTimeout(function() {
 			window.location.href = "/";
-			}, 4000);
+			}, 500);
 
 		} else if (authResult['error']) {
 			console.log('There was an error: ' + authResult['error']);

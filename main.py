@@ -52,12 +52,9 @@ def getUserID(email):
 
 @app.route('/')
 def main():
-    print 'access token is %s' % login_session.get('access_token')
-    print 'username is %s' % login_session.get('username')
-    if login_session.get('access_token') is not None:
-        print login_session['access_token']
-        user = session.query(User).filter(
-            User.email == login_session.get('email')).first()
+    user = checkForUser(login_session)
+    if user:
+        print 'user is logged in as %s' % user.name
         state = None
     else:
         user = None
@@ -75,20 +72,59 @@ def main():
 
 @app.route('/tutors/<string:subject_name>')
 def subjectView(subject_name):
+    user = checkForUser(login_session)
     subjects = session.query(Subject).all()
     sub_id = session.query(Subject.id).filter(
         Subject.name == subject_name).first()
     posts = session.query(Post).filter(Post.subject_id == sub_id[0]).all()
 
     return render_template('main.html',
+                           user=user,
                            subjects=subjects,
                            posts=posts)
 
 
 @app.route('/tutors/<string:subject_name>/<int:post_id>')
 def postView(subject_name, post_id):
+    user = checkForUser(login_session)
     post = session.query(Post).filter(Post.id == post_id).first()
-    return render_template('post.html', post=post)
+    return render_template('post.html',
+                           user=user,
+                           post=post)
+
+
+@app.route('/tutors/<string:subject_name>/new', methods=['GET','POST'])
+def newPost(subject_name):
+    if request.method == 'GET':
+        user = checkForUser(login_session)
+        if user is None:
+            return redirect(url_for('subjectView',
+                                    subject_name=subject_name))
+        else:
+            return render_template('newPost.html',
+                                   subject_name=subject_name,
+                                   user=user)
+    else:
+        user = checkForUser(login_session)
+        if user is None:
+            return redirect(url_for('subjectView',
+                                    subject_name=subject_name))
+        else:
+            description = request.form['description']
+            rate = request.form['rate']
+            subject = request.form['subject']
+
+            newPost = Post(description=description,
+                           rate=rate,
+                           subject=subject,
+                           user=user)
+            session.add(newPost)
+            session.commit()
+            print 'new post added:'
+            print newPost
+            return redirect(url_for('subjectView',
+                                    subject_name=subject_name))
+
 
 
 @app.route('/gconnect', methods=['POST'])
@@ -299,12 +335,11 @@ def fbdisconnect():
 
 @app.route('/listall')
 def listAll():
-    access_token = login_session.get('access_token')
-    print 'access token is %s' % access_token
-    if access_token is None:
-        username = 'No one was found logged in'
+    user = checkForUser(login_session)
+    if user:
+        username = user.name
     else:
-        username = login_session['username']
+        username = None
     subjects = session.query(Subject).all()
     posts = session.query(Post).all()
     users = session.query(User).all()
