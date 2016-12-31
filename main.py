@@ -98,9 +98,11 @@ def newPost(subject_name):
     if request.method == 'GET':
         user = checkForUser(login_session)
         if user is None:
+            print 'No logged in user found'
             return redirect(url_for('subjectView',
                                     subject_name=subject_name))
         else:
+            print 'Found %s as logged in user' % user.name
             return render_template('newPost.html',
                                    subject_name=subject_name,
                                    user=user)
@@ -124,7 +126,6 @@ def newPost(subject_name):
             print newPost
             return redirect(url_for('subjectView',
                                     subject_name=subject_name))
-
 
 
 @app.route('/gconnect', methods=['POST'])
