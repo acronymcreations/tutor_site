@@ -44,10 +44,19 @@ def checkForUser(login_session):
     return user
 
 
-def getUserID(email):
+def getUser(email):
     user = session.query(User).filter(
         User.email == email).first()
     return user
+
+
+def deleteSessionData(login_session):
+    del login_session['access_token']
+    del login_session['provider']
+    del login_session['provider_id']
+    del login_session['username']
+    del login_session['email']
+    del login_session['picture']
 
 
 @app.route('/')
@@ -198,11 +207,9 @@ def gconnect():
     print '3'
     # Store the access token in the session for later use.
     login_session['access_token'] = credentials.access_token
-    login_session['credentials'] = credentials
-    login_session['gplus_id'] = gplus_id
-    print login_session['access_token']
-    print login_session['credentials']
-    print login_session['gplus_id']
+    # login_session['credentials'] = credentials
+    login_session['provider_id'] = gplus_id
+    login_session['provider'] = 'google'
 
     print '2'
     # Get user info
@@ -216,44 +223,14 @@ def gconnect():
     login_session['picture'] = data['picture']
     login_session['email'] = data['email']
     print 'logged in as %s' % login_session['username']
-    userId = getUserID(login_session['email'])
-    if userId is None:
-        userId = createUser(login_session)
+    user = getUser(login_session['email'])
+    if user is None:
+        user = createUser(login_session)
 
     return redirect(url_for('main'))
 
 
-@app.route('/gdisconnect')
-def gdisconnect():
-    access_token = login_session.get('access_token')
-    print 'In gdisconnect access token is %s', access_token
-    print 'User name is: '
-    print login_session.get('username')
-    if access_token is None:
-        print 'Access Token is None'
-        response = make_response(
-            json.dumps('Current user not connected.'), 401)
-        response.headers['Content-Type'] = 'application/json'
-        return response
-    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % login_session['access_token']
-    h = httplib2.Http()
-    result = h.request(url, 'GET')[0]
-    print 'result is '
-    print result
-    if result['status'] == '200':
-        del login_session['access_token']
-        del login_session['gplus_id']
-        del login_session['username']
-        del login_session['email']
-        del login_session['picture']
-        response = make_response(json.dumps('Successfully disconnected.'), 200)
-        response.headers['Content-Type'] = 'application/json'
-        return response
-    else:
-        response = make_response(
-            json.dumps('Failed to revoke token for given user.', 400))
-        response.headers['Content-Type'] = 'application/json'
-        return response
+
 
 
 @app.route('/fbconnect', methods=['POST'])
@@ -290,7 +267,7 @@ def fbconnect():
     login_session['provider'] = 'facebook'
     login_session['username'] = data["name"]
     login_session['email'] = data["email"]
-    login_session['facebook_id'] = data["id"]
+    login_session['provider_id'] = data["id"]
 
     # The token must be stored in the login_session in order to properly logout, let's strip out the information before the equals sign in our token
     stored_token = token.split("=")[1]
@@ -304,34 +281,65 @@ def fbconnect():
 
     login_session['picture'] = data["data"]["url"]
 
-    # see if user exists
-    user_id = getUserID(login_session['email'])
-    if not user_id:
-        user_id = createUser(login_session)
-    login_session['user_id'] = user_id
+    user = checkForUser(login_session)
+    if user is None:
+        user = createUser(login_session)
 
-    output = ''
-    output += '<h1>Welcome, '
-    output += login_session['username']
+    return redirect(url_for('main'))
 
-    output += '!</h1>'
-    output += '<img src="'
-    output += login_session['picture']
-    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
 
-    flash("Now logged in as %s" % login_session['username'])
-    return output
+@app.route('/gdisconnect')
+def gdisconnect():
+    access_token = login_session.get('access_token')
+    if access_token is None:
+        print 'Access Token is None'
+        response = make_response(
+            json.dumps('Current user not connected.'), 401)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token
+    h = httplib2.Http()
+    result = h.request(url, 'GET')[0]
+    print 'result is '
+    print result
+    if result['status'] == '200':
+        deleteSessionData(login_session)
+        response = make_response(json.dumps('Successfully disconnected.'), 200)
+        response.headers['Content-Type'] = 'application/json'
+        return redirect(url_for('main'))
+    else:
+        response = make_response(
+            json.dumps('Failed to revoke token for given user.', 400))
+        response.headers['Content-Type'] = 'application/json'
+        return response
+
+
+@app.route('/logout')
+def logoutUser():
+    provider = login_session.get('provider')
+    if not provider:
+        return redirect(url_for('main'))
+    if provider == 'facebook':
+        return redirect(url_for('fbdisconnect'))
+    elif provider == 'google':
+        return redirect(url_for('gdisconnect'))
+
 
 
 @app.route('/fbdisconnect')
 def fbdisconnect():
-    facebook_id = login_session['facebook_id']
+    facebook_id = login_session['provider_id']
     # The access token must me included to successfully logout
     access_token = login_session['access_token']
     url = 'https://graph.facebook.com/%s/permissions?access_token=%s' % (facebook_id,access_token)
     h = httplib2.Http()
-    result = h.request(url, 'DELETE')[1]
-    return "you have been logged out"
+    result = h.request(url, 'DELETE')
+    print 'Status of logout is %s' % result[0]['status']
+    if result[0]['status']:
+        deleteSessionData(login_session)
+        return redirect(url_for('main'))
+    else:
+        return "failed to log out user"
 
 
 @app.route('/listall')
@@ -348,10 +356,8 @@ def listAll():
                            subjects=subjects,
                            posts=posts,
                            users=users,
-                           username=username)
-
-
-
+                           username=username,
+                           login_session=login_session)
 
 
 

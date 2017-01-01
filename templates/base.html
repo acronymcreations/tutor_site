@@ -17,8 +17,8 @@
 
 	{% if user is not none %}
 		<h3>Welcome {{user.name}}</h3>
-		<img src="{{user.picture}}" width="80"><br>
-		<a href="{{ url_for('gdisconnect') }}">logout</a>
+		<img src="{{user.picture}}" width="40"><br>
+		<a href="{{ url_for('logoutUser') }}">logout</a>
 	{% else %}
 		
 			<span class="all g-signin text-right"
@@ -56,6 +56,7 @@
 
 
 <script>
+console.log("this is the fb connect script")
   window.fbAsyncInit = function() {
   FB.init({
     appId      : '1771570873167821',
@@ -67,6 +68,7 @@
   };
   // Load the SDK asynchronously
   (function(d, s, id) {
+  	console.log("starting function")
     var js, fjs = d.getElementsByTagName(s)[0];
     if (d.getElementById(id)) return;
     js = d.createElement(s); js.id = id;
@@ -76,6 +78,7 @@
   // Here we run a very simple test of the Graph API after login is
   // successful.  See statusChangeCallback() for when this call is made.
   function sendTokenToServer() {
+  	console.log("send token to server")
     var access_token = FB.getAuthResponse()['accessToken'];
     console.log(access_token)
     console.log('Welcome!  Fetching your information.... ');
@@ -92,7 +95,7 @@
         if (result) {
           $('#result').html('Login Successful!</br>'+ result + '</br>Redirecting...')
          setTimeout(function() {
-          window.location.href = "/restaurant";
+          window.location.href = "/";
          }, 500);
           
       } else {
