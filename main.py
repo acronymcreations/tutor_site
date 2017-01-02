@@ -50,6 +50,18 @@ def getUser(email):
     return user
 
 
+def validateInput(description, rate):
+    params = {}
+    if not description:
+        params['description'] = 'Field cannot be left empty'
+    try:
+        rate = int(rate)
+    except:
+        params['rate'] = 'Rate should be the dollar amount per hour you ' \
+            'charge for tutoring. Do not include decimals.'
+    return params
+
+
 def deleteSessionData(login_session):
     del login_session['access_token']
     del login_session['provider']
@@ -90,7 +102,8 @@ def subjectView(subject_name):
     return render_template('main.html',
                            user=user,
                            subjects=subjects,
-                           posts=posts)
+                           posts=posts,
+                           subject_name=subject_name)
 
 
 @app.route('/tutors/<string:subject_name>/<int:post_id>')
@@ -102,7 +115,7 @@ def postView(subject_name, post_id):
                            post=post)
 
 
-@app.route('/tutors/<string:subject_name>/new', methods=['GET','POST'])
+@app.route('/tutors/<string:subject_name>/new', methods=['GET', 'POST'])
 def newPost(subject_name):
     if request.method == 'GET':
         user = checkForUser(login_session)
@@ -112,9 +125,11 @@ def newPost(subject_name):
                                     subject_name=subject_name))
         else:
             print 'Found %s as logged in user' % user.name
+            params = {}
             return render_template('newPost.html',
                                    subject_name=subject_name,
-                                   user=user)
+                                   user=user,
+                                   params=params)
     else:
         user = checkForUser(login_session)
         if user is None:
@@ -123,18 +138,58 @@ def newPost(subject_name):
         else:
             description = request.form['description']
             rate = request.form['rate']
-            subject = request.form['subject']
+            params = validateInput(description, rate)
 
+            if params:
+                return render_template('newPost.html',
+                                       subject_name=subject_name,
+                                       user=user,
+                                       params=params,
+                                       description=description,
+                                       rate=rate)
+
+            subject_id = session.query(Subject.id).filter(
+                Subject.name == subject_name).first()
             newPost = Post(description=description,
-                           rate=rate,
-                           subject=subject,
-                           user=user)
+                           rate=int(rate),
+                           user=user,
+                           subject_id=subject_id[0])
             session.add(newPost)
             session.commit()
             print 'new post added:'
             print newPost
             return redirect(url_for('subjectView',
                                     subject_name=subject_name))
+
+
+@app.route('/tutors/<string:subject_name>/<int:post_id>/edit',
+           methods=['POST', 'GET'])
+def editPost(subject_name, post_id):
+    post = session.query(Post).filter(Post.id == post_id).first()
+    if request.method == 'GET':
+        user = checkForUser(login_session)
+        if user is None:
+            return redirect(url_for('postView',
+                                    subject_name=subject_name,
+                                    post_id=post_id))
+        else:
+            print 'Found %s as logged in user' % user.name
+            params = {}
+            return render_template('newPost.html',
+                                   user=user,
+                                   subject_name=subject_name,
+                                   params=params,
+                                   description=post.description,
+                                   rate=post.rate,
+                                   post=post)
+    else:
+        # Validate input
+        post.description = request.form['description']
+        post.rate = request.form['rate']
+        session.commit()
+        return redirect(url_for('postView',
+                                subject_name=subject_name,
+                                post_id=post_id))
 
 
 @app.route('/gconnect', methods=['POST'])

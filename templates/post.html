@@ -9,5 +9,8 @@
 <h3 class="all">${{post.rate}} per hour</h3>
 <h3 class="all">{{post.user.email}}</h3>
 
+{% if post.user.email == user.email %}
+	<a href="{{ url_for('editPost', subject_name=post.subject.name, post_id=post.id) }}">Edit</a>
+{% endif %}
 
 {% endblock %}

@@ -17,6 +17,9 @@
 		<li><a href="{{url_for('postView',subject_name=p.subject.name,post_id=p.id)}}">{{p.user.name}}</a></li>
 		{% endfor %}
 	</ul>
+	{% if request.path != '/' and user %}
+		<a href="{{ url_for('newPost',subject_name=subject_name) }}">New Post</a>
+	{% endif %}
 	</section>
 	
 
