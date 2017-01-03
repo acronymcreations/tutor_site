@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from sqlalchemy import func
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -166,30 +166,73 @@ def newPost(subject_name):
            methods=['POST', 'GET'])
 def editPost(subject_name, post_id):
     post = session.query(Post).filter(Post.id == post_id).first()
+    user = checkForUser(login_session)
+    if user is None or user.email != post.user.email:
+        return redirect(url_for('postView',
+                                subject_name=subject_name,
+                                post_id=post_id))
     if request.method == 'GET':
-        user = checkForUser(login_session)
-        if user is None:
-            return redirect(url_for('postView',
-                                    subject_name=subject_name,
-                                    post_id=post_id))
-        else:
-            print 'Found %s as logged in user' % user.name
-            params = {}
+        print 'Found %s as logged in user' % user.name
+        params = {}
+        return render_template('newPost.html',
+                               user=user,
+                               subject_name=subject_name,
+                               params=params,
+                               description=post.description,
+                               rate=post.rate,
+                               post=post)
+    else:
+        description = request.form['description']
+        rate = request.form['rate']
+        params = validateInput(description, rate)
+        if params:
             return render_template('newPost.html',
                                    user=user,
                                    subject_name=subject_name,
                                    params=params,
-                                   description=post.description,
-                                   rate=post.rate,
+                                   description=description,
+                                   rate=rate,
                                    post=post)
-    else:
-        # Validate input
-        post.description = request.form['description']
-        post.rate = request.form['rate']
+        post.description = description
+        post.rate = rate
         session.commit()
         return redirect(url_for('postView',
                                 subject_name=subject_name,
                                 post_id=post_id))
+
+
+@app.route('/tutors/<string:subject_name>/<int:post_id>/delete',
+           methods=['POST', 'GET'])
+def deletePost(subject_name, post_id):
+    user = checkForUser(login_session)
+    post = session.query(Post).filter(Post.id == post_id).first()
+    if user is None or user.email != post.user.email:
+        return redirect(url_for('postView',
+                                subject_name=subject_name,
+                                post_id=post_id))
+    if request.method == 'GET':
+        return render_template('delete.html',
+                               user=user,
+                               post=post)
+    else:
+        session.delete(post)
+        session.commit()
+        print user
+        print subject_name
+        return redirect(url_for('subjectView',
+                                subject_name=subject_name))
+
+
+@app.route('/tutors/<int:subject_id>/json')
+def subjectPostsJson(subject_id):
+    posts = session.query(Post).filter(subject_id == Post.subject_id).all()
+    return jsonify(Posts=[p.serialize for p in posts])
+
+
+@app.route('/tutors/subjects/json')
+def subjectsJson():
+    subjects = session.query(Subject).all()
+    return jsonify(Subjects=[s.serialize for s in subjects])
 
 
 @app.route('/gconnect', methods=['POST'])

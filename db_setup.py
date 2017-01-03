@@ -54,8 +54,10 @@ class Post(Base):
     def serialize(self):
         return{
             'id': self.id,
+            'user': self.user.name,
             'description': self.description,
-            'rate': self.rate
+            'rate': self.rate,
+            'email': self.user.email
         }
 
 

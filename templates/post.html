@@ -11,6 +11,8 @@
 
 {% if post.user.email == user.email %}
 	<a href="{{ url_for('editPost', subject_name=post.subject.name, post_id=post.id) }}">Edit</a>
+	 &#10177; 
+	<a href="{{ url_for('deletePost', subject_name=post.subject.name, post_id=post.id) }}">Delete</a>
 {% endif %}
 
 {% endblock %}
