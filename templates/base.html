@@ -46,10 +46,12 @@
 	{% if path|length > 2 %}
 		/ <a href="{{ url_for('subjectView',subject_name=path[2]) }}">{{path[2]}}</a>
 	{% endif %}
-	{% if path|length > 3 and path[3] != 'new' %}
-		/ <a href="{{ url_for('postView',subject_name=path[2],post_id=path[3]) }}">{{post.user.name}}</a>
-	{% elif path|length > 3 and path[3] == 'new' %}
+	{% if path|length > 3 and path[3] == 'new' %}
 		/ <a href="{{ url_for('newPost',subject_name=path[2]) }}">new</a>
+	{% elif path|length > 3 and path[3] == 'edit' %}
+		/ <a href="{{ url_for('postView',subject_name=path[2],post_id=path[3]) }}">edit</a>
+	{% elif path|length > 3 %}
+		/ <a href="{{ url_for('postView',subject_name=path[2],post_id=path[3]) }}">{{title}}</a>
 	{% endif %}
 	
 	

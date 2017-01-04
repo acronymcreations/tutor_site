@@ -30,6 +30,8 @@ class Subject(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    user = relationship(User)
 
     @property
     def serialize(self):
@@ -43,8 +45,9 @@ class Post(Base):
     __tablename__ = 'post'
 
     id = Column(Integer, primary_key=True)
-    description = Column(String)
-    rate = Column(Integer)
+    title = Column(String(50), nullable=False)
+    description = Column(String, nullable=False)
+    rate = Column(Integer, nullable=False)
     user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship(User)
     subject_id = Column(Integer, ForeignKey('subject.id'))
@@ -55,6 +58,7 @@ class Post(Base):
         return{
             'id': self.id,
             'user': self.user.name,
+            'title': self.title,
             'description': self.description,
             'rate': self.rate,
             'email': self.user.email

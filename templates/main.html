@@ -11,10 +11,10 @@
 	</ul>
 	</section>
 	<section class="half" id="right">
-		<h3 class="all">Select a Tutor</h3>
+		<h3 class="all">Avalible Tutors</h3>
 		<ul class="all">
 		{% for p in posts %}
-		<li><a href="{{url_for('postView',subject_name=p.subject.name,post_id=p.id)}}">{{p.user.name}}</a></li>
+		<li><a href="{{url_for('postView',subject_name=p.subject.name,post_id=p.id)}}">{{p.title}}</a></li>
 		{% endfor %}
 	</ul>
 	{% if request.path != '/' and user %}

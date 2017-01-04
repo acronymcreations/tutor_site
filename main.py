@@ -50,8 +50,11 @@ def getUser(email):
     return user
 
 
-def validateInput(description, rate):
+def validateInput(title, description, rate):
     params = {}
+    if not title or len(title) > 49:
+        params['title'] = 'Field cannot be left empty and cannot ' \
+            'be more than 50 characters'
     if not description:
         params['description'] = 'Field cannot be left empty'
     try:
@@ -117,49 +120,46 @@ def postView(subject_name, post_id):
 
 @app.route('/tutors/<string:subject_name>/new', methods=['GET', 'POST'])
 def newPost(subject_name):
+    user = checkForUser(login_session)
+    if user is None:
+        print 'No logged in user found'
+        return redirect(url_for('subjectView',
+                                subject_name=subject_name))
     if request.method == 'GET':
-        user = checkForUser(login_session)
-        if user is None:
-            print 'No logged in user found'
-            return redirect(url_for('subjectView',
-                                    subject_name=subject_name))
-        else:
-            print 'Found %s as logged in user' % user.name
-            params = {}
+        print 'Found %s as logged in user' % user.name
+        params = {}
+        return render_template('newPost.html',
+                               subject_name=subject_name,
+                               user=user,
+                               params=params)
+    else:
+        title = request.form['title']
+        description = request.form['description']
+        rate = request.form['rate']
+        params = validateInput(title, description, rate)
+
+        if params:
             return render_template('newPost.html',
                                    subject_name=subject_name,
                                    user=user,
-                                   params=params)
-    else:
-        user = checkForUser(login_session)
-        if user is None:
-            return redirect(url_for('subjectView',
-                                    subject_name=subject_name))
-        else:
-            description = request.form['description']
-            rate = request.form['rate']
-            params = validateInput(description, rate)
+                                   params=params,
+                                   title=title,
+                                   description=description,
+                                   rate=rate)
 
-            if params:
-                return render_template('newPost.html',
-                                       subject_name=subject_name,
-                                       user=user,
-                                       params=params,
-                                       description=description,
-                                       rate=rate)
-
-            subject_id = session.query(Subject.id).filter(
-                Subject.name == subject_name).first()
-            newPost = Post(description=description,
-                           rate=int(rate),
-                           user=user,
-                           subject_id=subject_id[0])
-            session.add(newPost)
-            session.commit()
-            print 'new post added:'
-            print newPost
-            return redirect(url_for('subjectView',
-                                    subject_name=subject_name))
+        subject_id = session.query(Subject.id).filter(
+            Subject.name == subject_name).first()
+        newPost = Post(title=title,
+                       description=description,
+                       rate=int(rate),
+                       user=user,
+                       subject_id=subject_id[0])
+        session.add(newPost)
+        session.commit()
+        print 'new post added:'
+        print newPost
+        return redirect(url_for('subjectView',
+                                subject_name=subject_name))
 
 
 @app.route('/tutors/<string:subject_name>/<int:post_id>/edit',
@@ -178,21 +178,23 @@ def editPost(subject_name, post_id):
                                user=user,
                                subject_name=subject_name,
                                params=params,
+                               title=post.title,
                                description=post.description,
-                               rate=post.rate,
-                               post=post)
+                               rate=post.rate)
     else:
+        title = request.form['title']
         description = request.form['description']
         rate = request.form['rate']
-        params = validateInput(description, rate)
+        params = validateInput(title, description, rate)
         if params:
             return render_template('newPost.html',
                                    user=user,
                                    subject_name=subject_name,
                                    params=params,
+                                   title=title,
                                    description=description,
-                                   rate=rate,
-                                   post=post)
+                                   rate=rate)
+        post.title = title
         post.description = description
         post.rate = rate
         session.commit()
@@ -328,9 +330,6 @@ def gconnect():
     return redirect(url_for('main'))
 
 
-
-
-
 @app.route('/fbconnect', methods=['POST'])
 def fbconnect():
     print 'initialing fbconnect'
@@ -345,8 +344,9 @@ def fbconnect():
         'web']['app_id']
     app_secret = json.loads(
         open('fb_client_secrets.json', 'r').read())['web']['app_secret']
-    url = 'https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id=%s&client_secret=%s&fb_exchange_token=%s' % (
-        app_id, app_secret, access_token)
+    url = 'https://graph.facebook.com/oauth/access_token?grant_type=fb_' \
+        'exchange_token&client_id=%s&client_secret=%s&fb_exchange_token=%s' % (
+            app_id, app_secret, access_token)
     h = httplib2.Http()
     result = h.request(url, 'GET')[1]
 
@@ -354,7 +354,6 @@ def fbconnect():
     userinfo_url = "https://graph.facebook.com/v2.4/me"
     # strip expire tag from access token
     token = result.split("&")[0]
-
 
     url = 'https://graph.facebook.com/v2.4/me?%s&fields=name,id,email' % token
     h = httplib2.Http()
@@ -367,12 +366,15 @@ def fbconnect():
     login_session['email'] = data["email"]
     login_session['provider_id'] = data["id"]
 
-    # The token must be stored in the login_session in order to properly logout, let's strip out the information before the equals sign in our token
+    # The token must be stored in the login_session in order to
+    # properly logout, let's strip out the information before the
+    # equals sign in our token
     stored_token = token.split("=")[1]
     login_session['access_token'] = stored_token
 
     # Get user picture
-    url = 'https://graph.facebook.com/v2.4/me/picture?%s&redirect=0&height=200&width=200' % token
+    url = 'https://graph.facebook.com/v2.4/me/picture?%s' \
+        '&redirect=0&height=200&width=200' % token
     h = httplib2.Http()
     result = h.request(url, 'GET')[1]
     data = json.loads(result)
@@ -423,13 +425,13 @@ def logoutUser():
         return redirect(url_for('gdisconnect'))
 
 
-
 @app.route('/fbdisconnect')
 def fbdisconnect():
     facebook_id = login_session['provider_id']
     # The access token must me included to successfully logout
     access_token = login_session['access_token']
-    url = 'https://graph.facebook.com/%s/permissions?access_token=%s' % (facebook_id,access_token)
+    url = 'https://graph.facebook.com/%s/permissions?access_token=%s' % (
+        facebook_id, access_token)
     h = httplib2.Http()
     result = h.request(url, 'DELETE')
     print 'Status of logout is %s' % result[0]['status']
@@ -456,8 +458,6 @@ def listAll():
                            users=users,
                            username=username,
                            login_session=login_session)
-
-
 
 
 if __name__ == '__main__':
