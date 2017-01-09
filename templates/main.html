@@ -9,9 +9,12 @@
 		<li><a href="{{url_for('subjectView',subject_name=s.name)}}">{{s.name}}</a></li>
 		{% endfor %}
 	</ul>
+	{% if user %}
+	<a href="{{url_for('newSubject')}}">New Subject</a>
+	{% endif %}
 	</section>
 	<section class="half" id="right">
-		<h3 class="all">Avalible Tutors</h3>
+		<h3 class="all">Available Tutors</h3>
 		<ul class="all">
 		{% for p in posts %}
 		<li><a href="{{url_for('postView',subject_name=p.subject.name,post_id=p.id)}}">{{p.title}}</a></li>

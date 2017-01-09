@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
-from sqlalchemy import func
+from sqlalchemy import func, desc
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from flask import session as login_session
@@ -87,7 +87,7 @@ def main():
         login_session['state'] = state
         print 'state is %s' % state
 
-    subjects = session.query(Subject).all()
+    subjects = session.query(Subject).order_by(Subject.name).all()
     return render_template('main.html',
                            user=user,
                            subjects=subjects,
@@ -100,13 +100,36 @@ def subjectView(subject_name):
     subjects = session.query(Subject).all()
     sub_id = session.query(Subject.id).filter(
         Subject.name == subject_name).first()
-    posts = session.query(Post).filter(Post.subject_id == sub_id[0]).all()
+    posts = session.query(Post).filter(Post.subject_id == sub_id[0]).order_by(desc(Post.id)).all()
 
     return render_template('main.html',
                            user=user,
                            subjects=subjects,
                            posts=posts,
                            subject_name=subject_name)
+
+
+@app.route('/newSubject', methods=['GET', 'POST'])
+def newSubject():
+    user = checkForUser(login_session)
+    if not user:
+        return redirect('/')
+    if request.method == 'GET':
+        return render_template('newSubject.html',
+                               user=user)
+    else:
+        subject = request.form['subject']
+        if subject and len(subject) < 100:
+            subject = subject.replace(' ', '_').lower()
+            entry = Subject(name=subject, user=user)
+            session.add(entry)
+            session.commit()
+            return redirect('/')
+        else:
+            error = 'Field must be between 1 and 100 characters long'
+            return render_template('newSubject.html',
+                                   user=user,
+                                   error=error)
 
 
 @app.route('/tutors/<string:subject_name>/<int:post_id>')

@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+	<h2 class="all">Add a new Subject</h2>
+	<form method="POST">
+		<input type="text" name="subject">
+		<br>
+		{{error}}
+		<br>
+		<input type="submit" value="add">
+	</form>
+	
+
+{% endblock %}
