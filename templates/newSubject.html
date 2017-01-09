@@ -5,6 +5,7 @@
 	<h2 class="all">Add a new Subject</h2>
 	<form method="POST">
 		<input type="text" name="subject">
+		<input type="hidden" name="form_token" value="{{form_token}}">
 		<br>
 		{{error}}
 		<br>

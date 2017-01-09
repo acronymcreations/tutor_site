@@ -1,10 +1,11 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, abort
 from sqlalchemy import func, desc
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from flask import session as login_session
 import random
 import string
+import bleach
 from db_setup import Base, User, Subject, Post
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
@@ -74,6 +75,14 @@ def deleteSessionData(login_session):
     del login_session['picture']
 
 
+def generate_form_token(login_session):
+    form_token = ''.join(random.choice(
+        string.ascii_uppercase + string.digits) for x in xrange(32))
+    login_session['form_token'] = form_token
+    print 'generated form token'
+    return form_token
+
+
 @app.route('/')
 def main():
     user = checkForUser(login_session)
@@ -97,7 +106,7 @@ def main():
 @app.route('/tutors/<string:subject_name>')
 def subjectView(subject_name):
     user = checkForUser(login_session)
-    subjects = session.query(Subject).all()
+    subjects = session.query(Subject).order_by(Subject.name).all()
     sub_id = session.query(Subject.id).filter(
         Subject.name == subject_name).first()
     posts = session.query(Post).filter(Post.subject_id == sub_id[0]).order_by(desc(Post.id)).all()
@@ -115,10 +124,15 @@ def newSubject():
     if not user:
         return redirect('/')
     if request.method == 'GET':
+        form_token = generate_form_token(login_session)
         return render_template('newSubject.html',
-                               user=user)
+                               user=user,
+                               form_token=form_token)
     else:
         subject = request.form['subject']
+        form_token = request.form['form_token']
+        if not form_token or form_token != login_session.get('form_token'):
+            abort(403)
         if subject and len(subject) < 100:
             subject = subject.replace(' ', '_').lower()
             entry = Subject(name=subject, user=user)
@@ -127,9 +141,11 @@ def newSubject():
             return redirect('/')
         else:
             error = 'Field must be between 1 and 100 characters long'
+            form_token = generate_form_token(login_session)
             return render_template('newSubject.html',
                                    user=user,
-                                   error=error)
+                                   error=error,
+                                   form_token=form_token)
 
 
 @app.route('/tutors/<string:subject_name>/<int:post_id>')
@@ -138,7 +154,8 @@ def postView(subject_name, post_id):
     post = session.query(Post).filter(Post.id == post_id).first()
     return render_template('post.html',
                            user=user,
-                           post=post)
+                           post=post,
+                           title=post.title)
 
 
 @app.route('/tutors/<string:subject_name>/new', methods=['GET', 'POST'])
@@ -149,26 +166,32 @@ def newPost(subject_name):
         return redirect(url_for('subjectView',
                                 subject_name=subject_name))
     if request.method == 'GET':
-        print 'Found %s as logged in user' % user.name
+        form_token = generate_form_token(login_session)
         params = {}
         return render_template('newPost.html',
                                subject_name=subject_name,
                                user=user,
-                               params=params)
+                               params=params,
+                               form_token=form_token)
     else:
         title = request.form['title']
         description = request.form['description']
         rate = request.form['rate']
+        form_token = request.form['form_token']
+        if not form_token or form_token != login_session.get('form_token'):
+            abort(403)
         params = validateInput(title, description, rate)
 
         if params:
+            form_token = generate_form_token(login_session)
             return render_template('newPost.html',
                                    subject_name=subject_name,
                                    user=user,
                                    params=params,
                                    title=title,
                                    description=description,
-                                   rate=rate)
+                                   rate=rate,
+                                   form_token=form_token)
 
         subject_id = session.query(Subject.id).filter(
             Subject.name == subject_name).first()
@@ -195,7 +218,7 @@ def editPost(subject_name, post_id):
                                 subject_name=subject_name,
                                 post_id=post_id))
     if request.method == 'GET':
-        print 'Found %s as logged in user' % user.name
+        form_token = generate_form_token(login_session)
         params = {}
         return render_template('newPost.html',
                                user=user,
@@ -203,20 +226,26 @@ def editPost(subject_name, post_id):
                                params=params,
                                title=post.title,
                                description=post.description,
-                               rate=post.rate)
+                               rate=post.rate,
+                               form_token=form_token)
     else:
         title = request.form['title']
         description = request.form['description']
         rate = request.form['rate']
+        form_token = login_session.get('form_token')
+        if not form_token or form_token != login_session.get('form_token'):
+            abort(403)
         params = validateInput(title, description, rate)
         if params:
+            form_token = generate_form_token(login_session)
             return render_template('newPost.html',
                                    user=user,
                                    subject_name=subject_name,
                                    params=params,
                                    title=title,
                                    description=description,
-                                   rate=rate)
+                                   rate=rate,
+                                   form_token=form_token)
         post.title = title
         post.description = description
         post.rate = rate
@@ -236,16 +265,22 @@ def deletePost(subject_name, post_id):
                                 subject_name=subject_name,
                                 post_id=post_id))
     if request.method == 'GET':
+        form_token = generate_form_token(login_session)
         return render_template('delete.html',
                                user=user,
-                               post=post)
+                               post=post,
+                               form_token=form_token)
     else:
-        session.delete(post)
-        session.commit()
-        print user
-        print subject_name
-        return redirect(url_for('subjectView',
-                                subject_name=subject_name))
+        form_token = request.form['form_token']
+        if form_token == login_session.get('form_token'):
+            session.delete(post)
+            session.commit()
+            print user
+            print subject_name
+            return redirect(url_for('subjectView',
+                                    subject_name=subject_name))
+        else:
+            abort(403)
 
 
 @app.route('/tutors/<int:subject_id>/json')
