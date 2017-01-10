@@ -1,66 +1,29 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<link rel="stylesheet" type="text/css" href="{{url_for('static',filename='styles.css')}}?version=1">
-	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-	<script src="//apis.google.com/js/platform.js?onload=start"> </script>
-	<script src="{{url_for('static',filename='scripts.js')}}"></script>
-	<title>Find a Tutor</title>
-</head>
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2 class="all text-center">How would you like to login?</h2>
+<section class="all text-center">
+<span class="all text-center g-signin"
+	data-scope="openid email"
+	data-clientid="657606452543-auutgk0aef679iei9104gol12vo6bdf5.apps.googleusercontent.com"
+	data-redirecturi="postmessage"
+	data-accesstype="offline"
+	data-cookiepolicy="single_host_origin"
+	data-callback="signInCallback"
+	data-approvalprompt="force">
+</span>
+</section>
+<br>
+<!-- <button> -->
+<span class="all text-center">
+	<fb:login-button scope="public_profile,email" onlogin="sendTokenToServer();">
+	<a href='javascript:sendTokenToServer()'>Login with Facebook</a>
+	</fb:login-button>
+</span>
+<!-- </button> -->
 
 
-
-<body class="container">
-<h2 class="half">Find a Tutor</h2>
-
-<div class="half text-right">
-
-	{% if user is not none %}
-		<h3>Welcome {{user.name}}</h3>
-		<a href="{{url_for('profile')}}">
-			<img src="{{user.picture}}" width="40">
-		</a><br>
-		<a href="{{ url_for('logoutUser') }}">logout</a>
-	{% else %}
-		<a href="{{ url_for('login') }}">login</a>
-		{#
-		<span class="all g-signin text-right"
-			data-scope="openid email"
-			data-clientid="657606452543-auutgk0aef679iei9104gol12vo6bdf5.apps.googleusercontent.com"
-			data-redirecturi="postmessage"
-			data-accesstype="offline"
-			data-cookiepolicy="single_host_origin"
-			data-callback="signInCallback"
-			data-approvalprompt="force">
-		</span>
-		<br>
-		<!-- <button> -->
-			<fb:login-button scope="public_profile,email" onlogin="sendTokenToServer();">
-			<a href='javascript:sendTokenToServer()'>Login with Facebook</a>
-			</fb:login-button>
-		<!-- </button> -->
-		#}
-	{% endif %}
-</div>
-
-<div class="all">
-	{% set path = request.path.split('/') %}
-	<a href="{{ url_for('main') }}">home</a> 
-	{% if path|length > 2 %}
-		/ <a href="{{ url_for('subjectView',subject_name=path[2]) }}">{{path[2]}}</a>
-	{% endif %}
-	{% if path|length > 3 and path[3] == 'new' %}
-		/ <a href="{{ url_for('newPost',subject_name=path[2]) }}">new</a>
-	{% elif path|length > 3 and path[3] == 'edit' %}
-		/ <a href="{{ url_for('postView',subject_name=path[2],post_id=path[3]) }}">edit</a>
-	{% elif path|length > 3 %}
-		/ <a href="{{ url_for('postView',subject_name=path[2],post_id=path[3]) }}">{{title}}</a>
-	{% endif %}
-	
-	
-</div>
-
-{#
 <script>
 console.log("this is the fb connect script")
   window.fbAsyncInit = function() {
@@ -144,10 +107,9 @@ console.log("this is the fb connect script")
 
 	}); } }
 </script>
-#}
-{% block content %}
+
+
+
+
+
 {% endblock %}
-
-</body>
-
-</html>

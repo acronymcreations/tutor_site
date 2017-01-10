@@ -3,19 +3,23 @@ from sqlalchemy import func, desc
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from flask import session as login_session
+from werkzeug.utils import secure_filename
 import random
 import string
-import bleach
 from db_setup import Base, User, Subject, Post
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
 import httplib2
 import json
+import os
 from flask import make_response
 import requests
 
+UPLOAD_FOLDER = '/vagrant/tutor_site/static/pictures/'
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 CLIENT_ID = json.loads(
     open('client_secrets.json', 'r').read())['web']['client_id']
@@ -83,24 +87,29 @@ def generate_form_token(login_session):
     return form_token
 
 
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+def delete_file(user):
+    directory = '%s%s' % (app.config['UPLOAD_FOLDER'], user.id)
+    print directory
+    if os.listdir(directory):
+        print 'folder is not empty'
+        files = os.listdir(directory)
+        for file in files:
+            path = '%s/%s' % (directory, file)
+            os.remove(path)
+
+
 @app.route('/')
 def main():
     user = checkForUser(login_session)
-    if user:
-        print 'user is logged in as %s' % user.name
-        state = None
-    else:
-        user = None
-        state = ''.join(random.choice(string.ascii_uppercase + string.digits)
-                        for x in xrange(32))
-        login_session['state'] = state
-        print 'state is %s' % state
-
     subjects = session.query(Subject).order_by(Subject.name).all()
     return render_template('main.html',
                            user=user,
-                           subjects=subjects,
-                           STATE=state)
+                           subjects=subjects)
 
 
 @app.route('/tutors/<string:subject_name>')
@@ -293,6 +302,64 @@ def subjectPostsJson(subject_id):
 def subjectsJson():
     subjects = session.query(Subject).all()
     return jsonify(Subjects=[s.serialize for s in subjects])
+
+
+@app.route('/login')
+def login():
+    # user = checkForUser(login_session)
+    # return render_template('login.html', user=user)
+
+    user = checkForUser(login_session)
+    if user:
+        print 'user is logged in as %s' % user.name
+        state = None
+    else:
+        user = None
+        state = ''.join(random.choice(string.ascii_uppercase + string.digits)
+                        for x in xrange(32))
+        login_session['state'] = state
+        print 'state is %s' % state
+    return render_template('login.html',
+                           user=user,
+                           STATE=state)
+
+
+@app.route('/profile', methods=['GET', 'POST'])
+def profile():
+    user = checkForUser(login_session)
+    if not user:
+        return redirect(url_for('main'))
+    if request.method == 'GET':
+        return render_template('profile.html',
+                               user=user)
+    else:
+        file = request.files['picture']
+        name = request.form['name']
+        if name:
+            user.name = name
+            session.commit()
+        if file:
+            # if user does not select file, browser also
+            # submit a empty part without filename
+            if file.filename == '' or not allowed_file(file.filename):
+                file_error = 'There was an error with the file. ' \
+                    'Please select a .png, .jpeg, or .jpg file and try again.'
+                return render_template('profile.html',
+                                       user=user,
+                                       file_error=file_error)
+            else:
+                delete_file(user)
+                filename = secure_filename(file.filename)
+                directory = app.config['UPLOAD_FOLDER'] + str(user.id)
+                print directory
+                if not os.path.exists(directory):
+                    os.makedirs(directory)
+                    print 'directory created'
+                file.save(os.path.join(directory, filename))
+                static_filename = 'pictures/%s/%s' % (user.id, filename)
+                user.picture = url_for('static', filename=static_filename)
+                session.commit()
+        return redirect(url_for('main'))
 
 
 @app.route('/gconnect', methods=['POST'])

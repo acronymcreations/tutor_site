@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<form method="POST" enctype="multipart/form-data">
+	<h3>Name:</h3>
+	<input type="text" name="name" value="{{user.name}}">
+	<h3>Profile Picture:</h3>
+	<input type="file" name="picture">
+	<br>
+	<input type="submit">
+</form>
+
+
+{% endblock %}
