@@ -330,9 +330,14 @@ def profile():
     if not user:
         return redirect(url_for('main'))
     if request.method == 'GET':
+        form_token = generate_form_token(login_session)
         return render_template('profile.html',
-                               user=user)
+                               user=user,
+                               form_token=form_token)
     else:
+        form_token = request.form['form_token']
+        if not form_token or form_token != login_session.get('form_token'):
+            abort(403)
         file = request.files['picture']
         name = request.form['name']
         if name:
@@ -344,9 +349,11 @@ def profile():
             if file.filename == '' or not allowed_file(file.filename):
                 file_error = 'There was an error with the file. ' \
                     'Please select a .png, .jpeg, or .jpg file and try again.'
+                form_token = generate_form_token(login_session)
                 return render_template('profile.html',
                                        user=user,
-                                       file_error=file_error)
+                                       file_error=file_error,
+                                       form_token=form_token)
             else:
                 delete_file(user)
                 filename = secure_filename(file.filename)

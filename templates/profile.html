@@ -8,6 +8,9 @@
 	<h3>Profile Picture:</h3>
 	<input type="file" name="picture">
 	<br>
+	{{file_error}}
+	<br>
+	<input type="hidden" name="form_token" value="{{form_token}}">
 	<input type="submit">
 </form>
 
