@@ -1,5 +1,6 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, abort
-from sqlalchemy import func, desc
+from flask import Flask, render_template, request
+from flask import redirect, url_for, jsonify, abort
+from sqlalchemy import desc
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from flask import session as login_session
@@ -118,7 +119,8 @@ def subjectView(subject_name):
     subjects = session.query(Subject).order_by(Subject.name).all()
     sub_id = session.query(Subject.id).filter(
         Subject.name == subject_name).first()
-    posts = session.query(Post).filter(Post.subject_id == sub_id[0]).order_by(desc(Post.id)).all()
+    posts = session.query(Post).filter(Post.subject_id == sub_id[
+        0]).order_by(desc(Post.id)).all()
 
     return render_template('main.html',
                            user=user,
@@ -131,7 +133,7 @@ def subjectView(subject_name):
 def newSubject():
     user = checkForUser(login_session)
     if not user:
-        return redirect('/')
+        return redirect(url_for('main'))
     if request.method == 'GET':
         form_token = generate_form_token(login_session)
         return render_template('newSubject.html',
@@ -147,7 +149,7 @@ def newSubject():
             entry = Subject(name=subject, user=user)
             session.add(entry)
             session.commit()
-            return redirect('/')
+            return redirect(url_for('main'))
         else:
             error = 'Field must be between 1 and 100 characters long'
             form_token = generate_form_token(login_session)

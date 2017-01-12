@@ -1,28 +1,32 @@
+
 {% extends 'base.html' %}
 
 {% block content %}
 
-<h2>Add New Post</h2>
+<h2 class="title">Add New Post</h2>
 
 <form method="POST" class="all">
 <p>
-	<strong>
+	<span class="small-bubbler">
 		Subject: 
-	</strong> 
-	{{subject_name}}
+	</span> 
+	<span class="summary">
+		{{subject_name}}
+	</span>
+	
 </p>
 <p>
-	<strong>Title:</strong>
+	<span class="small-bubbler">Title:</span>
 	<input type="text" name="title" value="{{title}}">
 	{{params['title']}}
 </p>
 <p>
-	<strong>Description:</strong> <br>
+	<span class="small-bubbler">Description:</span> <br>
 	<textarea name="description" rows="5" cols="40">{{description}}</textarea>
 	{{params['description']}}
 </p>
 <p>
-	<strong>Rate per hour:</strong>  $
+	<span class="small-bubbler">Rate per hour:</span>  $
 	<input type="text" name="rate" value="{{rate}}">
 	{{params['rate']}}
 </p>

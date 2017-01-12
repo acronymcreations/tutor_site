@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<link rel="stylesheet" type="text/css" href="{{url_for('static',filename='styles.css')}}?version=2">
+	<link href="https://fonts.googleapis.com/css?family=Bubbler+One|Lato" rel="stylesheet">
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 	<script src="//apis.google.com/js/platform.js?onload=start"> </script>
 	<script src="{{url_for('static',filename='scripts.js')}}"></script>
+	<link rel="stylesheet" type="text/css" href="{{url_for('static',filename='styles.css')}}?version=10">
 	<title>Find a Tutor</title>
 </head>
 
@@ -14,18 +15,19 @@
 <section class="quarter">
 	<img src="{{ url_for('static', filename='logo.png') }}" width="80">
 </section>
-<h2 class="half text-center">Find a Tutor</h2>
+<h2 class="half text-center" id="main-title">Find a Tutor</h2>
 
-<div class="quarter text-right">
+<div class="quarter text-right summary">
 
 	{% if user is not none %}
-		Welcome {{user.name}}<br>
-		<a href="{{url_for('profile')}}"><img src="{{user.picture}}" width="40"></a>
-		<br>
+		<section id="profile-pic">
+			<a href="{{url_for('profile')}}"><img src="{{user.picture}}" width="40"></a>
+			<br>
+			{{user.name}}
+		</section>
 		<a href="{{ url_for('logoutUser') }}">logout</a>
 	{% else %}
 		<br>
-		
 		<br>
 		<a href="{{ url_for('login') }}">login</a>
 		{#
@@ -48,7 +50,7 @@
 	{% endif %}
 </div>
 
-<div class="all">
+<div class="all summary">
 	{% set path = request.path.split('/') %}
 	<a href="{{ url_for('main') }}">home</a> 
 	{% if path|length > 2 %}

@@ -2,22 +2,22 @@
 
 {% block content %}
 
-<section class="all" id="post-section">
-	<h2 class="all">{{post.title}}</h2>
-	<h4 class="all">{{post.description}}</h3>
+<section class="all post-section">
+	<h2 class="all title">{{post.title}}</h2>
+	<h4 class="all summary">{{post.description}}</h3>
 </section>
 
-<h3 class="all">Contact:</h3>
+<h3 class="all title">Contact:</h3>
 <span>
 	<img src="{{post.user.picture}}" width="70">
 </span>
-<span>
+<span class="summary">
 	{{post.user.name}}<br>
 	${{post.rate}} per hour<br>
 	{{post.user.email}}<br>
 </span>
 
-<section class="all">
+<section class="all summary">
 	{% if post.user.email == user.email %}
 		<a href="{{ url_for('editPost', subject_name=post.subject.name, post_id=post.id) }}">Edit</a>
 		 &#10177; 

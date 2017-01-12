@@ -6,30 +6,12 @@
 	}
 }
 
-/*html {
-	height: 100%;
-}*/
-
-*{
-
-}
-
 body{
 	display: flex;
 	flex-direction: column;
 	min-height: 100%;
 	background-image: url("background.png");
 }
-
-textarea,input[type=text],input[type=password]{
-	background: white;
-	font-size: 16px;
-}
-
-/*footer{
-	margin-top: auto;
-	padding-bottom: 30px;
-}*/
 
 .container{
 	display: flex;
@@ -71,29 +53,17 @@ textarea,input[type=text],input[type=password]{
 }
 
 .title{
+	font-family: 'Bubbler One', sans-serif;
 	font-size: 1.5em;
 }
 
+.small-bubbler{
+	font-family: 'Bubbler One', sans-serif;
+	font-size: 1.2em;
+}
+
 .summary{
-	font-size: 1.25em;
-	margin-top:0px;
-}
-
-.code{
-	background: #cccccc;
-	font-family: 'Source Code Pro', monospace;
-}
-
-.comment{
-	font-size: 1.2em
-}
-
-.delete-button,.edit-button,.like-button{
-	font-size: 1em;
-}
-
-.submit-button,.comment-button{
-	font-size: 1em
+	font-family: 'Lato', sans-serif;
 }
 
 .text-right{
@@ -108,13 +78,18 @@ textarea,input[type=text],input[type=password]{
 	background-color: lightblue;
 }
 
-#left{
-	background-color: lightblue;
+#main-title{
+	margin-top: 15px;
+	margin-bottom: 15px;
+	font-family: 'Bubbler One', sans-serif;
+	font-size: 3em;
 }
 
-#right{
-	background-color: lightblue;
+#profile-pic{
+	margin-bottom: 5px;
+	margin-top: 15px;
 }
+
 
 
 

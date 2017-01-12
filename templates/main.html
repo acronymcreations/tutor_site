@@ -2,27 +2,27 @@
 
 {% block content %}
 
-	<section class="half" id="left">
-		<h3 class="all">Select a Subject</h3>
-		<ul class="all">
-		{% for s in subjects %}
-		<li><a href="{{url_for('subjectView',subject_name=s.name)}}">{{s.name}}</a></li>
-		{% endfor %}
-	</ul>
-	{% if user %}
-	<a href="{{url_for('newSubject')}}">New Subject</a>
-	{% endif %}
+	<section class="half post-section">
+		<h3 class="all title">Select a Subject</h3>
+		<ul class="all summary">
+			{% for s in subjects %}
+				<li><a href="{{url_for('subjectView',subject_name=s.name)}}">{{s.name}}</a></li>
+			{% endfor %}
+		</ul>
+		{% if user %}
+			<a class="small-bubbler" href="{{url_for('newSubject')}}">New Subject</a>
+		{% endif %}
 	</section>
-	<section class="half" id="right">
-		<h3 class="all">Available Tutors</h3>
-		<ul class="all">
-		{% for p in posts %}
-		<li><a href="{{url_for('postView',subject_name=p.subject.name,post_id=p.id)}}">{{p.title}}</a></li>
-		{% endfor %}
-	</ul>
-	{% if request.path != '/' and user %}
-		<a href="{{ url_for('newPost',subject_name=subject_name) }}">New Post</a>
-	{% endif %}
+	<section class="half post-section">
+		<h3 class="all title">Available Tutors</h3>
+		<ul class="all summary">
+			{% for p in posts %}
+				<li><a href="{{url_for('postView',subject_name=p.subject.name,post_id=p.id)}}">{{p.title}}</a></li>
+			{% endfor %}
+		</ul>
+		{% if request.path != '/' and user %}
+			<a class="small-bubbler" href="{{ url_for('newPost',subject_name=subject_name) }}">New Post</a>
+		{% endif %}
 	</section>
 	
 
