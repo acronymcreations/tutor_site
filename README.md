@@ -1,4 +1,3 @@
-#### Warning: This project is still under construction and is not fully functional.  Use at your own risk.
 
 # Tutor Site
 
@@ -28,6 +27,8 @@ and expenisve.  With tutor site, students either find a tutor in a given subject
 
 3. Set up the database by running `python db_setup.py`
 
+	- Optionally, you can add some basic data to the site by running `python import_data.py`
+
 4. Start hosting the site by running `python main.py`
 
 5. The site can now by accessed via a web browser at `http://localhost:5000/`
@@ -36,9 +37,13 @@ and expenisve.  With tutor site, students either find a tutor in a given subject
 
 * `main.py` contains the bulk of the code including all of the handlers.
 
+* `import_data.py` Contains some basic info that can be loaded into the database after the database has been created.  It should not be run more than once.
+
 * `templates` contains all of the html for the pages.
 
-	* `base.html` contains the common header and footer for all pages.  It also contains the code needed for OAuth authentication
+	* `base.html` contains the common header and footer for all pages.  It also contains the code needed for OAuth authentication.
 
 * `static` contains all of the static files for the project, including the css, js, and images.
+
+	* `pictures` If a user decides to upload a profile picture, it is stored in this folder, organized by their user ID.
 
