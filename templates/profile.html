@@ -2,16 +2,22 @@
 
 {% block content %}
 
+<h2 class="all">{{user.name}}</h2>
+<section class="all">
+	<img src="{{user.picture}}" width="80">
+</section>
+
 <form method="POST" enctype="multipart/form-data">
-	<h3>Name:</h3>
+	<h3 class="all">Update Profile</h3>
+	<strong>Name:</strong>
 	<input type="text" name="name" value="{{user.name}}">
 	<h3>Profile Picture:</h3>
-	<input type="file" name="picture">
+	<input type="file" name="picture" accept=".jpg,.png,.jpeg,.py">
 	<br>
 	{{file_error}}
 	<br>
 	<input type="hidden" name="form_token" value="{{form_token}}">
-	<input type="submit">
+	<input type="submit" value="update">
 </form>
 
 

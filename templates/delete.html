@@ -4,16 +4,17 @@
 
 <h2 class="all">Are you sure?</h2>
 
-<h4 class="all">{{post.description}}</h4>
-
-<h4 class="all">{{post.rate}}</h4>
+<section class="all" id="post-section">
+	<h3>{{post.title}}</h3>
+	<h4 class="all">{{post.description}}</h4>
+</section>
 
 <form method="POST">
 	<input type="submit" value="delete">
 	<input type="hidden" name="form_token" value="{{form_token}}">
 </form>
-
-
-
+<form method="get" action="{{ url_for('postView',subject_name=post.subject.name, post_id=post.id) }}">
+    <button type="submit">cancel</button>
+</form>
 
 {% endblock %}

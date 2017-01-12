@@ -30,9 +30,10 @@
 	<input type="hidden" name="form_token" value="{{form_token}}">
 </p>
 	<input type="submit" value="Post">
-	
-	
+</form>
 
+<form action="{{ url_for('subjectView',subject_name=subject_name) }}">
+	<input type="submit" value="cancel">
 </form>
 
 

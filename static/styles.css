@@ -10,10 +10,15 @@
 	height: 100%;
 }*/
 
+*{
+
+}
+
 body{
 	display: flex;
 	flex-direction: column;
 	min-height: 100%;
+	background-image: url("background.png");
 }
 
 textarea,input[type=text],input[type=password]{
@@ -97,6 +102,10 @@ textarea,input[type=text],input[type=password]{
 
 .text-center{
 	text-align: center;
+}
+
+.post-section{
+	background-color: lightblue;
 }
 
 #left{
