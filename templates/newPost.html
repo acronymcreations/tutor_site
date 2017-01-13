@@ -5,6 +5,7 @@
 
 <h2 class="title">Add New Post</h2>
 
+{# Creates the form to add a new post to the database #}
 <form method="POST" class="all">
 <p>
 	<span class="small-bubbler">
@@ -36,6 +37,7 @@
 	<input type="submit" value="Post">
 </form>
 
+{# Creates a new form for the cancel button #}
 <form action="{{ url_for('subjectView',subject_name=subject_name) }}">
 	<input type="submit" value="cancel">
 </form>

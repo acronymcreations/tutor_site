@@ -2,6 +2,7 @@
 
 {% block content %}
 
+{# Shows post asking user to confirm before deleting #}
 <h2 class="all title">Are you sure you want to delete this post?</h2>
 
 <section class="all post-section">
@@ -9,10 +10,12 @@
 	<h4 class="all summary">{{post.description}}</h4>
 </section>
 
+{# Short form for deleting the post #}
 <form method="POST">
 	<input type="submit" value="delete">
 	<input type="hidden" name="form_token" value="{{form_token}}">
 </form>
+{# Short form for canceling and returning to the prevouis page #}
 <form method="get" action="{{ url_for('postView',subject_name=post.subject.name, post_id=post.id) }}">
     <button type="submit">cancel</button>
 </form>

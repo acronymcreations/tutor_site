@@ -1,9 +1,15 @@
+{# This page contains all of the code to handle the OAuth logins.
+I tried to move the js to a seperate file but was unable to 
+figure out how. #}
 
 {% extends 'base.html' %}
 
 {% block content %}
 
 <h2 class="all text-center title">How would you like to login?</h2>
+
+{# Handles the google login #}
+{# This code was taken mostly from the lessons #}
 <section class="all text-center">
 <span class="all text-center g-signin"
 	data-scope="openid email"
@@ -16,15 +22,16 @@
 </span>
 </section>
 <br>
-<!-- <button> -->
+{# Handles the facebook login button #}
+{# This code was taken mostly from the lessons #}
 <span class="all text-center">
 	<fb:login-button scope="public_profile,email" onlogin="sendTokenToServer();">
 	<a href='javascript:sendTokenToServer()'>Login with Facebook</a>
 	</fb:login-button>
 </span>
-<!-- </button> -->
 
-
+{# js function that connects to facebook and allows the user to login #}
+{# This code was taken directly from the lessons #}
 <script>
 console.log("this is the fb connect script")
   window.fbAsyncInit = function() {
@@ -78,7 +85,8 @@ console.log("this is the fb connect script")
   }
 </script>
 
-
+{# js function that handles the google login process #}
+{# This code was taken directly from the lessons #}
 <script>
 	function signInCallback(authResult) {
 		if (authResult['code']) {
@@ -108,9 +116,6 @@ console.log("this is the fb connect script")
 
 	}); } }
 </script>
-
-
-
 
 
 {% endblock %}

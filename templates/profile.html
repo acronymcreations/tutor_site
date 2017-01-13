@@ -3,11 +3,13 @@
 
 {% block content %}
 
+{# Shows the users profile as it currently is #}
 <h2 class="all title">{{user.name}}</h2>
 <section class="all">
 	<img src="{{user.picture}}" width="80">
 </section>
 
+{# Form to allow the user to update his name or profile picture #}
 <form method="POST" enctype="multipart/form-data">
 	<h3 class="all small-bubbler">Update Profile</h3>
 	<span class="summary">Name:</span>
@@ -16,7 +18,8 @@
 	<br>
 	<section class="summary">Profile Picture:</section>
 	<br>
-	<input type="file" name="picture" accept=".jpg,.png,.jpeg,.py">
+	{# Aids the user in picking a picture by eliminating non-image filetypes #}
+	<input type="file" name="picture" accept=".jpg,.png,.jpeg">
 	<br>
 	{{file_error}}
 	<br>

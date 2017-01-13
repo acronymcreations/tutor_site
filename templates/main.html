@@ -1,7 +1,10 @@
+{# This is the home page of the site #}
+
 {% extends 'base.html' %}
 
 {% block content %}
 
+	{# Displays the left side listing all avalible subjects #}
 	<section class="half post-section">
 		<h3 class="all title">Select a Subject</h3>
 		<ul class="all summary">
@@ -13,6 +16,7 @@
 			<a class="small-bubbler" href="{{url_for('newSubject')}}">New Subject</a>
 		{% endif %}
 	</section>
+	{# Displays the right side displaying all avalible postings in a given subject #}
 	<section class="half post-section">
 		<h3 class="all title">Available Tutors</h3>
 		<ul class="all summary">

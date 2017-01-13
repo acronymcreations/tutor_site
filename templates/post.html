@@ -2,11 +2,13 @@
 
 {% block content %}
 
+{# Shows the post information #}
 <section class="all post-section">
 	<h2 class="all title">{{post.title}}</h2>
 	<h4 class="all summary">{{post.description}}</h3>
 </section>
 
+{# Shows the contact information of the original poster #}
 <h3 class="all title">Contact:</h3>
 <span>
 	<img src="{{post.user.picture}}" width="70">
@@ -17,6 +19,8 @@
 	{{post.user.email}}<br>
 </span>
 
+{# If the logged in user matches the poster, edit and 
+delete buttons are shown #}
 <section class="all summary">
 	{% if post.user.email == user.email %}
 		<a href="{{ url_for('editPost', subject_name=post.subject.name, post_id=post.id) }}">Edit</a>
