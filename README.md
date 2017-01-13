@@ -4,7 +4,7 @@
 ## Overview
 
 The goal of this project is to help students find other students to tutor them.  Finding a private tutor can be very difficult
-and expenisve.  With tutor site, students either find a tutor in a given subject or offer their tutoring services to others.
+and expensive.  With tutor site, students either find a tutor in a given subject or offer their tutoring services to others.
 
 ## Running the site
 
@@ -35,15 +35,15 @@ and expenisve.  With tutor site, students either find a tutor in a given subject
 
 ## Files
 
-* `main.py` contains the bulk of the code including all of the handlers.
+* `main.py` contains the bulk of the code including all the handlers.
 
 * `import_data.py` Contains some basic info that can be loaded into the database after the database has been created.  It should not be run more than once.
 
 * `templates` contains all of the html for the pages.
 
-	* `base.html` contains the common header and footer for all pages.  It also contains the code needed for OAuth authentication.
+	* `base.html` contains the common header and footer for all pages.
 
-* `static` contains all of the static files for the project, including the css, js, and images.
+* `static` contains all the static files for the project, including the css, js, and images.
 
 	* `pictures` If a user decides to upload a profile picture, it is stored in this folder, organized by their user ID.
 
