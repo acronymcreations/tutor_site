@@ -53,9 +53,9 @@ of page to aid the user in navigating the site. #}
 	{% elif path|length > 3 %}
 		/ <a href="{{ url_for('postView',subject_name=path[2],post_id=path[3]) }}">{{title}}</a>
 	{% endif %}
-	
-	
 </div>
+
+<hr class="top-bar all">
 
 {% block content %}
 {% endblock %}

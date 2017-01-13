@@ -110,9 +110,12 @@ def allowed_file(filename):
 def delete_file(user):
     directory = '%s%s' % (app.config['UPLOAD_FOLDER'], user.id)
     print directory
-    if os.listdir(directory):
+    # Checks if user already has a folder to store profile pic
+    # as well as if the folder is empty or not
+    if os.path.exists(directory) and os.listdir(directory):
         print 'folder is not empty'
         files = os.listdir(directory)
+        # Deletes any prevouis profile pictures
         for file in files:
             path = '%s/%s' % (directory, file)
             os.remove(path)
@@ -162,7 +165,7 @@ def newSubject():
     else:
         subject = request.form['subject']
         form_token = request.form['form_token']
-        # If the form_token is not found or does not match login_session, 
+        # If the form_token is not found or does not match login_session,
         # action is aborted
         if not form_token or form_token != login_session.get('form_token'):
             abort(403)
@@ -173,7 +176,8 @@ def newSubject():
             session.add(entry)
             session.commit()
             return redirect(url_for('main'))
-        # If there is a problem with the subject, page is reloaded with an error message
+        # If there is a problem with the subject,
+        # page is reloaded with an error message
         else:
             error = 'Field must be between 1 and 100 characters long'
             form_token = generate_form_token(login_session)
@@ -375,7 +379,8 @@ def login():
     if user:
         return redirect(url_for('main'))
     else:
-        # Creates unique token for authentication and saves it to the login session
+        # Creates unique token for authentication
+        # and saves it to the login session
         state = ''.join(random.choice(string.ascii_uppercase + string.digits)
                         for x in xrange(32))
         login_session['state'] = state
